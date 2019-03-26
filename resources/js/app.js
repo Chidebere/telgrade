@@ -10,11 +10,18 @@ require('./bootstrap');
 window.Vue = require('vue');
 import moment from 'moment';
 
+
+import Gate from './Gate';
+Vue.prototype.$gate = new Gate(window.user);
+
+
 //Handling form error
 import { Form, HasError, AlertError } from 'vform';
 window.Form = Form;
 Vue.component(HasError.name, HasError)
 Vue.component(AlertError.name, AlertError)
+
+Vue.component('pagination', require('laravel-vue-pagination'));
 
 import VueRouter from 'vue-router'
 Vue.use(VueRouter)
@@ -88,6 +95,12 @@ Vue.component(
 Vue.component(
     'passport-personal-access-tokens',
     require('./components/passport/PersonalAccessTokens.vue').default
+);
+
+//Page not found
+Vue.component(
+    'not-found',
+    require('./components/NotFound.vue').default
 );
 
 

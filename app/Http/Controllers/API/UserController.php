@@ -21,7 +21,10 @@ class UserController extends Controller
      */
     public function index()
     {
-        return User::latest()->paginate(10);
+        // $this->authorize('isAdmin');
+        if(\Gate::allows('isAdmin') || \Gate::allows('isAuthor')){
+            return User::latest()->paginate(5);
+        }
     }
 
     /**
@@ -147,6 +150,8 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
+        $this->authorize('isAdmin'); //Determine the ACL (access level)
+
         $user = User::findOrFail($id);
         //delete user
         $user->delete();

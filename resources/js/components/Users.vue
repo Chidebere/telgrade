@@ -3,7 +3,12 @@
         <div class="row justify-content-center mt-5">
 
             <div class="col-md-12">
-            <div class="card">
+
+                <div v-if="!$gate.isAdminOrAuthor()">
+                     <not-found></not-found>
+                </div>
+
+            <div class="card" v-if="$gate.isAdminOrAuthor()">
               <div class="card-header">
                 <h3 class="card-title">User List</h3>
 
@@ -23,7 +28,7 @@
                     <th>Created on</th>
                     <th>Modify</th>
                   </tr>
-                  <tr v-for="user in users" :key="user.id">
+                  <tr v-for="user in users.data" :key="user.id">
                     <td>{{ user.id }}</td>
                     <td>{{ user.name }}</td>
                     <td>{{ user.email }}</td>
@@ -46,6 +51,11 @@
                 </tbody></table>
               </div>
               <!-- /.card-body -->
+
+              <div class="card-footer">
+                  <pagination :data="users"
+                   @pagination-change-page="getResults"></pagination>
+              </div>
             </div>
             <!-- /.card -->
           </div>
@@ -143,6 +153,13 @@ export default {
                     }
                 },
             methods: {
+                // Our method to GET results from a Laravel endpoint
+		        getResults(page = 1) {
+                axios.get('api/user?page=' + page)
+                        .then(response => {
+                            this.users = response.data;
+                        });
+                },
                 updateUser(){
                     this.form.put('api/user/' + this.form.id)
                     .then(()=>{
@@ -195,18 +212,21 @@ export default {
                                     )
                                 Fire.$emit('EventAction');
                             })
-
                             .catch(() => {
-                                Swal("Failed!", "There was something wrong", "warning");
+                                Swal.fire("Failed!", "There was something wrong", "warning");
                             })
                         }
                     })
                 },
                 loadUsers() {
                     this.$Progress.start();
+
+                    if(this.$gate.isAdminOrAuthor()){
                     axios.get('api/user')
-                    .then(({ data }) => (this.users = data.data));
-                    this.$Progress.finish();
+                    .then(({ data }) => (this.users = data));
+                    }
+
+                     this.$Progress.finish();
                 },
                 createUser() {
                 // Submit the form via a POST request
